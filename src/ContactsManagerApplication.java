@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ContactsManagerApplication {
@@ -76,7 +77,7 @@ public class ContactsManagerApplication {
             System.out.println("\t-----------------------------------------");
             for (Contact contact : contacts) {
                 i++;
-                System.out.printf("\t%d) %-18s | %-15s |\n", i, contact.getName(), contact.getNumber());
+                System.out.printf("\t%d) %-18s | %-15s |\n", i, contact.getName(), formatPhoneNumber(contact.getNumber()));
             }
         }
     }
@@ -103,19 +104,18 @@ public class ContactsManagerApplication {
             System.out.printf("\nThere's already a contact named %s.\n", target.toUpperCase());
             confirm = input.yesNo("Do you want to overwrite it? (Yes/No)");
             if (confirm) {
-                contacts.get(counter).setNumber(input.getString("New Number: "));
+                contacts.get(counter).setNumber(input.getString("New Number (No dashes): "));
                 Files.write(filepath, ioOut(contacts).getBytes());
                 System.out.println("\nContact updated\n");
                 System.out.println("\tName: " + contacts.get(counter).getName());
-                System.out.println("\tNew Phone#: " + contacts.get(counter).getNumber());
+                System.out.println("\tNew Phone#: " + formatPhoneNumber(contacts.get(counter).getNumber()));
             } else {
                 addNewContact(contacts);
             }
         } else {
-            Contact newContact = new Contact(target, input.getString("Contact Number: "));
+            Contact newContact = new Contact(target, input.getString("Contact Number (No dashes): "));
             addContact(contacts, newContact);
         }
-
     }
 
     private static void searchContacts(List<Contact> contacts){
@@ -138,11 +138,10 @@ public class ContactsManagerApplication {
 
         if (userFound) {
             System.out.println("Name: " + target);
-            System.out.println("Phone#: " + contacts.get(counter).getNumber());
+            System.out.println("Phone#: " + formatPhoneNumber(contacts.get(counter).getNumber()));
         } else {
             System.out.printf("\nNo contact found with the name %s.\n", target.toUpperCase());
         }
-
     }
 
     private static void removeExistingContact(List<Contact> contacts){
@@ -161,14 +160,33 @@ public class ContactsManagerApplication {
                 System.out.printf("\nContact: %s was removed from your list.\n", target.toUpperCase());
             }
         }
+    }
 
+    private static String formatPhoneNumber(String phoneNumber){
+        String[] arr = phoneNumber.split("");
+        boolean result= Arrays.asList(arr).contains("-");
+
+        String formattedNumber = "";
+        if (phoneNumber.length() == 7){
+            for(int i=0;i<phoneNumber.length();i++){
+                formattedNumber += arr[i];
+                if (i == 2){
+                    formattedNumber += "-";
+                }
+            }
+        }
+        if (phoneNumber.length() == 10 || !result){
+            for(int i=0;i<phoneNumber.length();i++){
+                formattedNumber += arr[i];
+                if (i == 2 || i == 5){
+                    formattedNumber += "-";
+                }
+            }
+        }
+        return formattedNumber;
     }
 
     public static void main(String[] args) throws IOException {
-
-        System.out.println("\nContacts I/O - created by Bryce and Jeff.");
-
-
         Input input = new Input();
         boolean confirm = true;
         List<Contact> contacts;
@@ -177,33 +195,23 @@ public class ContactsManagerApplication {
             contacts = new ArrayList<>();
         }
 
+        System.out.println("\nContacts I/O - created by Bryce and Jeff.");
         do {
             int selection = menuSelection();
 
             switch (selection) {
                 case 1:
-                    printContactList(contacts);
-                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
-                    break;
+                    printContactList(contacts); break;
                 case 2:
-                    addNewContact(contacts);
-                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
-                    break;
+                    addNewContact(contacts); break;
                 case 3:
-                    searchContacts(contacts);
-                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
-                    break;
+                    searchContacts(contacts); break;
                 case 4:
-                    removeExistingContact(contacts);
-                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
-                    break;
+                    removeExistingContact(contacts); break;
                 case 5:
-                    confirm = false;
-                    break;
+                    confirm = false; break;
             }
-
         } while (confirm);
-
         System.out.println("\nGoodbye, and have a nice day!");
         Files.write(filepath, ioOut(contacts).getBytes());
     }
