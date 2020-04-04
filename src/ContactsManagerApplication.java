@@ -54,75 +54,148 @@ public class ContactsManagerApplication {
         return index;
     }
 
+    private static int menuSelection() {
+        Input input = new Input();
+        System.out.println("\nPlease select an option:\n");
+        System.out.println("\t1. View contacts");
+        System.out.println("\t2. Add a new contact");
+        System.out.println("\t3. Search a contact by name");
+        System.out.println("\t4. Delete an existing contact");
+        System.out.println("\t5. Exit");
+
+        return input.getInt(1, 5, "\nPlease make your selection: ");
+    }
+
+    private static void printContactList(List<Contact> contacts) {
+        if (contacts.size() == 0) {
+            System.out.println("\nYou have no contacts...Please add a new contact.");
+        } else {
+            System.out.println("\nHere are your contacts:\n");
+            int i = 0;
+            System.out.printf("\t%s  %-18s | %-15s |\n", "#", "Name: ", "Phone #:");
+            System.out.println("\t-----------------------------------------");
+            for (Contact contact : contacts) {
+                i++;
+                System.out.printf("\t%d) %-18s | %-15s |\n", i, contact.getName(), contact.getNumber());
+            }
+        }
+    }
+
+    private static void addNewContact(List<Contact> contacts) throws IOException {
+        Input input = new Input();
+        boolean confirm = true;
+        String target;
+
+        System.out.println();
+        boolean userFound = false;
+        int counter = 0;
+        target = input.getString("Contact Name: ");
+
+        for (Contact contact : contacts) {
+            if (contact.getName().equalsIgnoreCase(target)) {
+                userFound = true;
+                break;
+            }
+            counter++;
+        }
+
+        if (userFound) {
+            System.out.printf("\nThere's already a contact named %s.\n", target.toUpperCase());
+            confirm = input.yesNo("Do you want to overwrite it? (Yes/No)");
+            if (confirm) {
+                contacts.get(counter).setNumber(input.getString("New Number: "));
+                Files.write(filepath, ioOut(contacts).getBytes());
+                System.out.println("\nContact updated\n");
+                System.out.println("\tName: " + contacts.get(counter).getName());
+                System.out.println("\tNew Phone#: " + contacts.get(counter).getNumber());
+            } else {
+                addNewContact(contacts);
+            }
+        } else {
+            Contact newContact = new Contact(target, input.getString("Contact Number: "));
+            addContact(contacts, newContact);
+        }
+
+    }
+
+    private static void searchContacts(List<Contact> contacts){
+        Input input = new Input();
+        boolean confirm = true;
+        String target;
+
+        System.out.println();
+        boolean userFound = false;
+        int counter = 0;
+        target = input.getString("Contact Name: ");
+
+        for (Contact contact : contacts) {
+            if (contact.getName().equalsIgnoreCase(target)) {
+                userFound = true;
+                break;
+            }
+            counter++;
+        }
+
+        if (userFound) {
+            System.out.println("Name: " + target);
+            System.out.println("Phone#: " + contacts.get(counter).getNumber());
+        } else {
+            System.out.printf("\nNo contact found with the name %s.\n", target.toUpperCase());
+        }
+
+    }
+
+    private static void removeExistingContact(List<Contact> contacts){
+        Input input = new Input();
+        boolean confirm = true;
+        String target;
+
+        target = input.getString("What is the contact's name?: ");
+        int indexToRemove = removeContact(contacts, target);
+        if (indexToRemove == -1) {
+            System.out.println("That person was not found.");
+        } else {
+            confirm = input.yesNo("!!!  ARE YOU SURE YOU WANT TO DELETE THIS CONTACT?  !!!");
+            if (confirm) {
+                contacts.remove(indexToRemove);
+                System.out.printf("\nContact: %s was removed from your list.\n", target.toUpperCase());
+            }
+        }
+
+    }
+
     public static void main(String[] args) throws IOException {
 
-        System.out.println("\nContacts I/O - created by Bryce and Jeff.\n");
+        System.out.println("\nContacts I/O - created by Bryce and Jeff.");
 
 
         Input input = new Input();
         boolean confirm = true;
         List<Contact> contacts;
-        String target;
         contacts = readContacts();
         if (contacts == null) {
             contacts = new ArrayList<>();
         }
 
         do {
-            System.out.println("Please select an option:\n");
-            System.out.println("\t1. View contacts");
-            System.out.println("\t2. Add a new contact");
-            System.out.println("\t3. Search a contact by name");
-            System.out.println("\t4. Delete an existing contact");
-            System.out.println("\t5. Exit");
-
-            int selection = input.getInt(1, 5, "\nPlease make your selection: ");
+            int selection = menuSelection();
 
             switch (selection) {
                 case 1:
-                    if (contacts.size() == 0) {
-                        System.out.println("\nYou have no contacts...Please add a new contact.");
-                    } else {
-                        System.out.println("\nHere are your contacts:\n");
-                        int i = 0;
-                        System.out.printf("\t%s  %-18s | %-15s |\n", "#","Name: ", "Phone #:");
-                        System.out.println("\t-----------------------------------------");
-                        for (Contact contact : contacts) {
-                            i++;
-                            System.out.printf("\t%d) %-18s | %-15s |\n", i, contact.getName(), contact.getNumber());
-                        }
-                    }
-                    confirm = input.yesNo("\nwould you like to continue?");
+                    printContactList(contacts);
+                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
                     break;
                 case 2:
-                    Contact newContact = new Contact(input.getString("Contact Name: "), input.getString("Contact Number: "));
-                    addContact(contacts, newContact);
-                    confirm = input.yesNo("would you like to continue?");
+                    addNewContact(contacts);
+                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
                     break;
                 case 3:
-                    target = input.getString("What is the contact's name?: ");
-                    for (Contact contact : contacts) {
-                        if (contact.getName().equalsIgnoreCase(target)) {
-                            System.out.println("Name: " + target);
-                            System.out.println("Phone#: " + contact.getNumber());
-                        }
-                    }
-                    confirm = input.yesNo("would you like to continue?");
+                    searchContacts(contacts);
+                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
                     break;
                 case 4:
-                    target = input.getString("What is the contact's name?: ");
-                    int indexToRemove= removeContact(contacts,target);
-                    if (indexToRemove == -1){
-                        System.out.println("That person was not found.");
-                    }else{
-                        confirm = input.yesNo("!!!  ARE YOU SURE YOU WANT TO DELETE THIS CONTACT?  !!!");
-                        if (confirm){
-                        contacts.remove(indexToRemove);
-                            System.out.printf("\nContact: %s was removed from your list.\n");
-                        }
-                    }
-
-                    confirm = input.yesNo("would you like to continue?");
+                    removeExistingContact(contacts);
+                    confirm = input.yesNo("\nWould you like to continue? (Yes/No)");
                     break;
                 case 5:
                     confirm = false;
@@ -132,6 +205,6 @@ public class ContactsManagerApplication {
         } while (confirm);
 
         System.out.println("\nGoodbye, and have a nice day!");
-//        System.out.println(ioOut(contacts));
+        Files.write(filepath, ioOut(contacts).getBytes());
     }
 }
