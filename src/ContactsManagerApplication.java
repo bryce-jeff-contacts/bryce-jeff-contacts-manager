@@ -16,18 +16,18 @@ public class ContactsManagerApplication {
     //adds contact to the contacts List and writes it to the filepath
     public static void addContact(List<Contact> contacts, Contact newContact) throws IOException {
         contacts.add(newContact);
-        Files.write(filepath, ioOut(contacts).getBytes());
+        Files.write(filepath, ioOut(contacts).getBytes());  //code to write to the specified filepath
     }
 
     //reads contacts from the filepath and writes them as contacts to the contacts List
     private static List<Contact> readContacts() {
         try {
-            List<String> tempContactList = Files.readAllLines(filepath);
+            List<String> tempContactList = Files.readAllLines(filepath); //pulls down all lines from the containing file
             List<Contact> contactsList = new ArrayList<>();
-            for (int i = 1; i < tempContactList.size(); i++) {
-                String[] thisContact = tempContactList.get(i).split(",");
-                Contact contact = new Contact(thisContact[0], thisContact[1]);
-                contactsList.add(contact);
+            for (int i = 1; i < tempContactList.size(); i++) {  //loop splits each line into an array and sets that line to a "Contact" object
+                String[] thisContact = tempContactList.get(i).split(",");  //splits line into string array
+                Contact contact = new Contact(thisContact[0], thisContact[1]);  //sets the name and number of a new contact
+                contactsList.add(contact);  //adds contact to contact list
             }
             return contactsList;
         } catch (IOException ioe) {
@@ -117,15 +117,14 @@ public class ContactsManagerApplication {
                 System.out.println("\nContact updated\n");
                 System.out.println("\tName: " + contacts.get(counter).getName());
                 System.out.println("\tNew Phone#: " + formatPhoneNumber(contacts.get(counter).getNumber()));
-            } else {
-                addNewContact(contacts);
             }
         } else {
-            Contact newContact = new Contact(target, input.getString("Contact Number (No dashes): "));
+            Contact newContact = new Contact(target,correctPhoneNumber(input.getString("Phone # (No dashes): ")));
             addContact(contacts, newContact);
         }
     }
 
+    //method that searches through contacts looking for a user input value
     private static void searchContacts(List<Contact> contacts){
         Input input = new Input();
 
@@ -150,6 +149,7 @@ public class ContactsManagerApplication {
         }
     }
 
+    //method to remove a contact.  includes a verification prior to full deletion.
     private static void removeExistingContact(List<Contact> contacts){
         Input input = new Input();
         boolean confirm;
@@ -168,11 +168,11 @@ public class ContactsManagerApplication {
         }
     }
 
+    //formats phone number to include dashes
     private static String formatPhoneNumber(String phoneNumber){
         String[] arr = phoneNumber.split("");
-        boolean result= Arrays.asList(arr).contains("-");
-
         StringBuilder formattedNumber = new StringBuilder();
+
         if (phoneNumber.length() == 7){
             for(int i=0;i<phoneNumber.length();i++){
                 formattedNumber.append(arr[i]);
@@ -181,7 +181,8 @@ public class ContactsManagerApplication {
                 }
             }
         }
-        if (phoneNumber.length() == 10 || !result){
+
+        if (phoneNumber.length() == 10 ){
             for(int i=0;i<phoneNumber.length();i++){
                 formattedNumber.append(arr[i]);
                 if (i == 2 || i == 5){
@@ -189,7 +190,24 @@ public class ContactsManagerApplication {
                 }
             }
         }
+
         return formattedNumber.toString();
+    }
+
+    private static String correctPhoneNumber(String phoneNumber) {
+        Input input = new Input();
+        String[] arr = phoneNumber.split("");
+
+        for (String s : arr) {
+            char thisIndex = s.charAt(0);
+            if (!Character.isDigit(thisIndex)) {
+                System.out.println("Wrong format detected.");
+                phoneNumber = input.getString("Contact Number (No dashes): ");
+                correctPhoneNumber(phoneNumber);
+                break;
+            }
+        }
+        return phoneNumber;
     }
 
     public static void main(String[] args) throws IOException {
