@@ -10,13 +10,16 @@ import java.util.List;
 
 public class ContactsManagerApplication {
 
+    //sets the static filepath
     static Path filepath = Paths.get("data", "contacts.txt");
 
+    //adds contact to the contacts List and writes it to the filepath
     public static void addContact(List<Contact> contacts, Contact newContact) throws IOException {
         contacts.add(newContact);
         Files.write(filepath, ioOut(contacts).getBytes());
     }
 
+    //reads contacts from the filepath and writes them as contacts to the contacts List
     private static List<Contact> readContacts() {
         try {
             List<String> tempContactList = Files.readAllLines(filepath);
@@ -33,6 +36,7 @@ public class ContactsManagerApplication {
         }
     }
 
+    //string builder for the IO string that is written to the filepath
     private static String ioOut(List<Contact> contacts) {
         StringBuilder output = new StringBuilder("Name:,Phone:\n");
         for (Contact contact : contacts) {
@@ -42,6 +46,7 @@ public class ContactsManagerApplication {
         return output.toString();
     }
 
+    //deletes the input contact
     private static int removeContact(List<Contact> contacts, String target) {
 
         int counter = 0;
@@ -55,6 +60,7 @@ public class ContactsManagerApplication {
         return index;
     }
 
+    //prints the CLI menu to terminal
     private static int menuSelection() {
         Input input = new Input();
         System.out.println("\nPlease select an option:\n");
@@ -67,6 +73,7 @@ public class ContactsManagerApplication {
         return input.getInt(1, 5, "\nPlease make your selection: ");
     }
 
+    //prints the contacts List to terminal
     private static void printContactList(List<Contact> contacts) {
         if (contacts.size() == 0) {
             System.out.println("\nYou have no contacts...Please add a new contact.");
@@ -82,9 +89,10 @@ public class ContactsManagerApplication {
         }
     }
 
+    //input and validation method used by addContact method
     private static void addNewContact(List<Contact> contacts) throws IOException {
         Input input = new Input();
-        boolean confirm = true;
+        boolean confirm;
         String target;
 
         System.out.println();
@@ -120,13 +128,11 @@ public class ContactsManagerApplication {
 
     private static void searchContacts(List<Contact> contacts){
         Input input = new Input();
-        boolean confirm = true;
-        String target;
 
         System.out.println();
         boolean userFound = false;
         int counter = 0;
-        target = input.getString("Contact Name: ");
+        String target = input.getString("Contact Name: ");
 
         for (Contact contact : contacts) {
             if (contact.getName().equalsIgnoreCase(target)) {
@@ -146,7 +152,7 @@ public class ContactsManagerApplication {
 
     private static void removeExistingContact(List<Contact> contacts){
         Input input = new Input();
-        boolean confirm = true;
+        boolean confirm;
         String target;
 
         target = input.getString("What is the contact's name?: ");
@@ -166,28 +172,27 @@ public class ContactsManagerApplication {
         String[] arr = phoneNumber.split("");
         boolean result= Arrays.asList(arr).contains("-");
 
-        String formattedNumber = "";
+        StringBuilder formattedNumber = new StringBuilder();
         if (phoneNumber.length() == 7){
             for(int i=0;i<phoneNumber.length();i++){
-                formattedNumber += arr[i];
+                formattedNumber.append(arr[i]);
                 if (i == 2){
-                    formattedNumber += "-";
+                    formattedNumber.append("-");
                 }
             }
         }
         if (phoneNumber.length() == 10 || !result){
             for(int i=0;i<phoneNumber.length();i++){
-                formattedNumber += arr[i];
+                formattedNumber.append(arr[i]);
                 if (i == 2 || i == 5){
-                    formattedNumber += "-";
+                    formattedNumber.append("-");
                 }
             }
         }
-        return formattedNumber;
+        return formattedNumber.toString();
     }
 
     public static void main(String[] args) throws IOException {
-        Input input = new Input();
         boolean confirm = true;
         List<Contact> contacts;
         contacts = readContacts();
