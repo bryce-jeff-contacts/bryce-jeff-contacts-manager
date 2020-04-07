@@ -1,6 +1,5 @@
 package util;
 
-import javax.sound.midi.Soundbank;
 import java.util.Scanner;
 
 public class Input {
@@ -87,7 +86,7 @@ public class Input {
 
         try {
             return Integer.parseInt(input.trim());
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             System.out.println("Invalid format...");
             return getInt(prompt);
         }

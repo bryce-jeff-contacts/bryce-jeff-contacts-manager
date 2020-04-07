@@ -47,12 +47,12 @@ public class ContactsManagerApplication {
     }
 
     //deletes the input contact
-    private static int removeContact(List<Contact> contacts, String target) {
+    private static int removeContact(List<Contact> list, String target) {
 
         int counter = 0;
         int index = -1;
-        for (Contact contact : contacts) {
-            if (contact.getName().equalsIgnoreCase(target)) {
+        for (Contact object : list) {   //same as for (Contact object of List of Contact objects)
+            if (object.getName().equalsIgnoreCase(target)) {
                 index = counter;
             }
             counter++;
@@ -74,17 +74,17 @@ public class ContactsManagerApplication {
     }
 
     //prints the contacts List to terminal
-    private static void printContactList(List<Contact> contacts) {
-        if (contacts.size() == 0) {
+    private static void printContactList(List<Contact> list) {
+        if (list.size() == 0) {
             System.out.println("\nYou have no contacts...Please add a new contact.");
         } else {
             System.out.println("\nHere are your contacts:\n");
             int i = 0;
             System.out.printf("\t%s  %-18s | %-15s |\n", "#", "Name: ", "Phone #:");
             System.out.println("\t-----------------------------------------");
-            for (Contact contact : contacts) {
+            for (Contact element : list) {
                 i++;
-                System.out.printf("\t%d) %-18s | %-15s |\n", i, contact.getName(), formatPhoneNumber(contact.getNumber()));
+                System.out.printf("\t%d) %-18s | %-15s |\n", i, element.getName(), formatPhoneNumber(element.getNumber()));
             }
         }
     }
@@ -112,7 +112,7 @@ public class ContactsManagerApplication {
             System.out.printf("\nThere's already a contact named %s.\n", target.toUpperCase());
             confirm = input.yesNo("Do you want to overwrite it? (Yes/No)");
             if (confirm) {
-                contacts.get(counter).setNumber(input.getString("New Number (No dashes): "));
+                contacts.get(counter).setNumber(correctPhoneNumber(input.getString("New Number (No dashes): ")));
                 Files.write(filepath, ioOut(contacts).getBytes());
                 System.out.println("\nContact updated\n");
                 System.out.println("\tName: " + contacts.get(counter).getName());
@@ -220,13 +220,13 @@ public class ContactsManagerApplication {
 
         System.out.println("\nContacts I/O - created by Bryce and Jeff.");
         do {
-            int selection = menuSelection();
+            int selection = menuSelection(); //line 65
 
             switch (selection) {
                 case 1:
-                    printContactList(contacts); break;
+                    printContactList(contacts); break; //line 77
                 case 2:
-                    addNewContact(contacts); break;
+                    addNewContact(contacts); break; //line 93
                 case 3:
                     searchContacts(contacts); break;
                 case 4:
@@ -238,4 +238,5 @@ public class ContactsManagerApplication {
         System.out.println("\nGoodbye, and have a nice day!");
         Files.write(filepath, ioOut(contacts).getBytes());
     }
+
 }
